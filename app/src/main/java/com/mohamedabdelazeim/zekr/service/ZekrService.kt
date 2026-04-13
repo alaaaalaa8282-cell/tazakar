@@ -1,4 +1,4 @@
-package com.mohamedabdelazeim.zekr.service
+Enterpackage com.mohamedabdelazeim.zekr.service
 
 import android.app.*
 import android.content.Context
