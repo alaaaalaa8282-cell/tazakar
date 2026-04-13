@@ -1,5 +1,7 @@
 package com.mohamedabdelazeim.zekr.service
 
+import android.app.AlarmManager
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -45,9 +47,9 @@ class ZekrService : Service() {
 
         val mode = ZekrPrefs.getPlaybackMode(this)
         
-        val index = if (mode == 1) {
-            ZekrPrefs.getRepeatIndex(this)
-        } else {            ZekrPrefs.nextZekrIndex(this)
+        val index = if (mode == 1) {            ZekrPrefs.getRepeatIndex(this)
+        } else {
+            ZekrPrefs.nextZekrIndex(this)
         }
 
         val safeIndex = index.coerceIn(0, ZekrData.zekrList.size - 1)
@@ -94,10 +96,12 @@ class ZekrService : Service() {
         )
     }
 
-    private fun isCallActive(): Boolean {
-        return try {
-            val tm = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager            tm.callState != TelephonyManager.CALL_STATE_IDLE
-        } catch (e: Exception) { false }
+    private fun isCallActive(): Boolean {        return try {
+            val tm = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            tm.callState != TelephonyManager.CALL_STATE_IDLE
+        } catch (e: Exception) { 
+            false 
+        }
     }
 
     private fun isInCommunication(): Boolean {
@@ -105,14 +109,18 @@ class ZekrService : Service() {
             val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
             audioManager.mode == AudioManager.MODE_IN_CALL || 
             audioManager.mode == AudioManager.MODE_IN_COMMUNICATION
-        } catch (e: Exception) { false }
+        } catch (e: Exception) { 
+            false 
+        }
     }
 
     private fun isAudioBusy(): Boolean {
         return try {
             val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
             am.isMusicActive
-        } catch (e: Exception) { false }
+        } catch (e: Exception) { 
+            false 
+        }
     }
 
     private fun buildNotification(title: String, text: String): Notification {
@@ -137,15 +145,15 @@ class ZekrService : Service() {
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
 
         if (bmp != null) {
-            builder.setLargeIcon(bmp)
-                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bmp))
+            builder.setLargeIcon(bmp)                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bmp))
         }
 
         return builder.build()
     }
 
     private fun createChannel() {
-        val ch = NotificationChannel(CHANNEL_ID, "ذكر", NotificationManager.IMPORTANCE_HIGH).apply {            description = "إشعارات الأذكار اليومية"
+        val ch = NotificationChannel(CHANNEL_ID, "ذكر", NotificationManager.IMPORTANCE_HIGH).apply {
+            description = "إشعارات الأذكار اليومية"
             enableVibration(true)
         }
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
