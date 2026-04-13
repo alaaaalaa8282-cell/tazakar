@@ -29,8 +29,8 @@ class ZekrService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // تحقق من المكالمات والأذان
         if (isCallActive() || isAudioBusy()) {
+            scheduleNext(this)
             stopSelf()
             return START_NOT_STICKY
         }
@@ -46,14 +46,34 @@ class ZekrService : Service() {
             mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
             mediaPlayer?.setOnCompletionListener {
                 it.release()
+                scheduleNext(this)
                 stopSelf()
             }
             mediaPlayer?.start()
         } else {
-            android.os.Handler(mainLooper).postDelayed({ stopSelf() }, 5000)
+            android.os.Handler(mainLooper).postDelayed({
+                scheduleNext(this)
+                stopSelf()
+            }, 5000)
         }
 
         return START_NOT_STICKY
+    }
+
+    private fun scheduleNext(context: Context) {
+        if (!ZekrPrefs.isEnabled(context)) return
+        val interval = ZekrPrefs.getIntervalMinutes(context).toLong()
+        val intent = Intent(context, ZekrService::class.java)
+        val pending = PendingIntent.getService(
+            context, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val alarmManager = context.getSystemService(AlarmManager::class.java)
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + interval * 60 * 1000,
+            pending
+        )
     }
 
     private fun isCallActive(): Boolean {
@@ -76,18 +96,15 @@ class ZekrService : Service() {
             PendingIntent.FLAG_IMMUTABLE
         )
         val bmp = BitmapFactory.decodeResource(resources, R.drawable.notification_father)
-
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setLargeIcon(bmp)
-            .setContentTitle("🤲 $title")
+            .setContentTitle("🌙 $title")
             .setContentText(text.take(80))
-            .setStyle(
-                NotificationCompat.BigPictureStyle()
-                    .bigPicture(bmp)
-                    .bigLargeIcon(null as android.graphics.Bitmap?)
-                    .setSummaryText(text.take(100))
-            )
+            .setStyle(NotificationCompat.BigPictureStyle()
+                .bigPicture(bmp)
+                .bigLargeIcon(null as android.graphics.Bitmap?)
+                .setSummaryText(text.take(100)))
             .setContentIntent(pi)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(false)
@@ -95,11 +112,12 @@ class ZekrService : Service() {
     }
 
     private fun createChannel() {
-        val ch = NotificationChannel(CHANNEL_ID, "أذكار", NotificationManager.IMPORTANCE_HIGH).apply {
-            description = "إشعارات الأذكار الصوتية"
+        val ch = NotificationChannel(CHANNEL_ID, "ذكر", NotificationManager.IMPORTANCE_HIGH).apply {
+            description = "إشعارات الاذكار اليومية"
             enableVibration(true)
         }
-        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(ch)
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+            .createNotificationChannel(ch)
     }
 
     override fun onDestroy() {
