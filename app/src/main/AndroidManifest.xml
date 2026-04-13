@@ -1,14 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- ========== الأذونات الأساسية ========== -->
+    <!-- إشعارات -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    
+    <!-- التشغيل عند بدء التشغيل -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    
+    <!-- الخدمة في الخلفية -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    
+    <!-- منع النوم -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    
+    <!-- حالة المكالمات -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    
+    <!-- المؤقت الدقيق -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
-   
+    
+    <!-- ========== الأذونات الجديدة (للاحترافية) ========== -->
+    <!-- الرسم فوق التطبيقات -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    
+    <!-- تجاهل تحسين البطارية -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    
+    <!-- الاهتزاز -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    
+    <!-- الإنترنت -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -17,6 +43,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ZekrApp">
 
+        <!-- ========== النشاط الرئيسي ========== -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -27,6 +54,7 @@
             </intent-filter>
         </activity>
 
+        <!-- ========== مستقبل بدء التشغيل ========== -->
         <receiver
             android:name=".receiver.BootReceiver"
             android:exported="true">
@@ -35,6 +63,7 @@
             </intent-filter>
         </receiver>
 
+        <!-- ========== الخدمة ========== -->
         <service
             android:name=".service.ZekrService"
             android:exported="false"
