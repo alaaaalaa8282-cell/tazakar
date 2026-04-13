@@ -11,10 +11,10 @@ object ZekrPrefs {
     private const val KEY_ZEKR_INDEX = "zekr_index"
     
     // مفاتيح الحفظ الجديدة (لوضع التكرار)
-    private const val KEY_PLAYBACK_MODE = "playback_mode" // 0 = تلقائي، 1 = تكرار
+    private const val KEY_PLAYBACK_MODE = "playback_mode"
     private const val KEY_REPEAT_INDEX = "repeat_selected_index"
 
-    // ========== الدوال القديمة (ماتغيرتش) ==========
+    // ========== الدوال القديمة ==========
     fun getIntervalInMinutes(ctx: Context) =
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt(KEY_INTERVAL, 30)
 
@@ -35,27 +35,22 @@ object ZekrPrefs {
         return current
     }
 
-    // ========== الدوال الجديدة (لإضافة خيار التكرار) ==========
-    
-    // الحصول على وضع التشغيل (0 = ترتيب تلقائي، 1 = تكرار ذكر معين)
+    // ========== الدوال الجديدة ==========
     fun getPlaybackMode(ctx: Context): Int {
         return ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_PLAYBACK_MODE, 0) // الافتراضي 0 (تلقائي)
+            .getInt(KEY_PLAYBACK_MODE, 0)
     }
 
-    // حفظ وضع التشغيل
     fun setPlaybackMode(ctx: Context, mode: Int) {
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit().putInt(KEY_PLAYBACK_MODE, mode).apply()
     }
 
-    // الحصول على رقم الذكر المختار للتكرار
     fun getRepeatIndex(ctx: Context): Int {
         return ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getInt(KEY_REPEAT_INDEX, 0)
     }
 
-    // حفظ رقم الذكر المختار للتكرار
     fun setRepeatIndex(ctx: Context, index: Int) {
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit().putInt(KEY_REPEAT_INDEX, index).apply()
