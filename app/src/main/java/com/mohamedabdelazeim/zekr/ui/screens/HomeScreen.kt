@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mohamedabdelazeim.zekr.R
+import com.mohamedabdelazeim.zekr.data.ZekrData
 import com.mohamedabdelazeim.zekr.data.ZekrPrefs
 import com.mohamedabdelazeim.zekr.worker.ZekrScheduler
 
@@ -27,23 +28,29 @@ import com.mohamedabdelazeim.zekr.worker.ZekrScheduler
 @Composable
 fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
     val ctx = LocalContext.current
+    
+    // قراءة الإعدادات
     var enabled by remember { mutableStateOf(ZekrPrefs.isEnabled(ctx)) }
-    var selectedInterval by remember { mutableStateOf(ZekrPrefs.getIntervalMinutes(ctx)) }
+    var selectedInterval by remember { mutableStateOf(ZekrPrefs.getIntervalInMinutes(ctx)) }
     var expanded by remember { mutableStateOf(false) }
+    
+    // متغيرات جديدة للتحكم في الوضع
+    var playbackMode by remember { mutableStateOf(ZekrPrefs.getPlaybackMode(ctx)) } // 0 = ترتيبي، 1 = تكرار
+    var selectedRepeatIndex by remember { mutableStateOf(ZekrPrefs.getRepeatIndex(ctx)) }
+    var dhikrMenuExpanded by remember { mutableStateOf(false) }
 
     val intervals = listOf(15, 30, 60, 120)
     val gold = Color(0xFFFFD700)
     val darkGreen = Color(0xFF1B5E20)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background - Father's photo
+        // Background
         Image(
             painter = painterResource(R.drawable.bg_father),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentDescription = null,            modifier = Modifier.fillMaxSize(),
+            contentScale = androidx.compose.ui.layout.ContentScale.Crop
         )
-
+        
         // Dark overlay
         Box(
             modifier = Modifier
@@ -63,7 +70,7 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(48.dp))
-
+            
             // Title
             Text(
                 "محمد عبد العظيم",
@@ -73,7 +80,7 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                 textAlign = TextAlign.Center
             )
             Text(
-                "لذكر الله",
+                "ذكر",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Medium,
                 color = Color.White,
@@ -84,13 +91,12 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                 fontSize = 36.sp,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
-
+            
             Spacer(Modifier.height(24.dp))
 
             // Settings Card
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.fillMaxWidth(),                shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xCC1B2E1C))
             ) {
                 Column(
@@ -98,7 +104,7 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        "⚙️ إعدادات الأذكار",
+                        "⚙️ إعدادات الذكر",
                         color = gold,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -106,9 +112,9 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                     )
 
                     // Interval selector
-                    Text("الفترة الزمنية بين الأذكار", color = Color.White, fontSize = 14.sp)
+                    Text("⏱ الفترة الزمنية بين الأذكار", color = Color.White, fontSize = 14.sp)
                     Spacer(Modifier.height(8.dp))
-
+                    
                     ExposedDropdownMenuBox(
                         expanded = expanded,
                         onExpandedChange = { expanded = it }
@@ -118,9 +124,7 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                             onValueChange = {},
                             readOnly = true,
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth(),
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
@@ -134,19 +138,86 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                         ) {
                             intervals.forEach { min ->
                                 DropdownMenuItem(
-                                    text = { Text("كل $min دقيقة") },
+                                    text = { Text("$min دقيقة") },
                                     onClick = {
                                         selectedInterval = min
-                                        ZekrPrefs.setIntervalMinutes(ctx, min)
+                                        ZekrPrefs.setIntervalInMinutes(ctx, min)
                                         if (enabled) ZekrScheduler.schedule(ctx, min.toLong())
                                         expanded = false
                                     }
-                                )
-                            }
+                                )                            }
                         }
                     }
 
-                    Spacer(Modifier.height(20.dp))
+                    Spacer(Modifier.height(16.dp))
+
+                    // ================== الجزء الجديد: اختيار الوضع ==================
+                    Text("🎮 طريقة التشغيل", color = Color.White, fontSize = 14.sp, modifier = Modifier.align(Alignment.Start))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            if (playbackMode == 0) "ترتيب تلقائي (دور)" else "تكرار ذكر محدد",
+                            color = if (playbackMode == 0) Color.LightGray else gold,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Switch(
+                            checked = playbackMode == 1,
+                            onCheckedChange = { 
+                                playbackMode = if (it) 1 else 0
+                                ZekrPrefs.setPlaybackMode(ctx, playbackMode)
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = gold,
+                                checkedTrackColor = darkGreen
+                            )
+                        )
+                    }
+
+                    // لو اختار تكرار، نعرض قائمة الأذكار
+                    if (playbackMode == 1) {
+                        Spacer(Modifier.height(8.dp))
+                        ExposedDropdownMenuBox(
+                            expanded = dhikrMenuExpanded,
+                            onExpandedChange = { dhikrMenuExpanded = it }
+                        ) {
+                            OutlinedTextField(
+                                value = if (selectedRepeatIndex < ZekrData.zekrList.size) 
+                                            ZekrData.zekrList[selectedRepeatIndex].name 
+                                        else "اختر ذكر...",
+                                onValueChange = {},
+                                readOnly = true,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(dhikrMenuExpanded) },
+                                modifier = Modifier.menuAnchor().fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,                                    focusedBorderColor = gold,
+                                    unfocusedBorderColor = Color.Gray
+                                )
+                            )
+                            ExposedDropdownMenu(
+                                expanded = dhikrMenuExpanded,
+                                onDismissRequest = { dhikrMenuExpanded = false }
+                            ) {
+                                ZekrData.zekrList.forEachIndexed { index, zekr ->
+                                    DropdownMenuItem(
+                                        text = { Text(zekr.name, color = if (index == selectedRepeatIndex) gold else Color.Black) },
+                                        onClick = {
+                                            selectedRepeatIndex = index
+                                            ZekrPrefs.setRepeatIndex(ctx, index)
+                                            dhikrMenuExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    // =================================================================
+
+                    Spacer(Modifier.height(16.dp))
 
                     // Enable Switch
                     Row(
@@ -155,7 +226,7 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            if (enabled) "✅ الأذكار مفعّلة" else "⏸ الأذكار متوقفة",
+                            if (enabled) "✅ الأذكار مفعلة" else "⛔ الأذكار متوقفة",
                             color = if (enabled) gold else Color.Gray,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
@@ -172,13 +243,12 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                                 checkedThumbColor = Color.Black,
                                 checkedTrackColor = gold
                             )
-                        )
-                    }
-
+                        )                    }
+                    
                     if (enabled) {
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            "سيُذكِّرك بالأذكار كل $selectedInterval دقيقة 🔔",
+                            "⏰ سيتذكرك بالأذكار كل $selectedInterval دقيقة",
                             color = Color(0xFFAAAAAA),
                             fontSize = 13.sp,
                             textAlign = TextAlign.Center
@@ -203,14 +273,15 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                         fontSize = 16.sp,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
+
                     val zekrNames = listOf(
                         "🤲 الصلاة على النبي ﷺ",
                         "📖 آية الأحزاب",
-                        "🌟 الحمد لله",
-                        "🌟 اللهم لك الحمد",
-                        "🌟 لا حول ولا قوة إلا بالله",
-                        "🌟 سبحان الله وبحمده",
-                        "🤍 ربي اغفر لي ولوالدي"
+                        "⭐ الحمد لله",
+                        "🤲 اللهم لك الحمد",
+                        "⭐ لا حول ولا قوة إلا بالله",
+                        "💎 سبحان الله وبحمده",
+                        "💎 ربِّ اغفر لي وتُبْ عليّ"
                     )
                     zekrNames.forEach { zekr ->
                         Text(
@@ -222,7 +293,6 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                     }
                 }
             }
-
             Spacer(Modifier.height(16.dp))
 
             // Adhkar Button
