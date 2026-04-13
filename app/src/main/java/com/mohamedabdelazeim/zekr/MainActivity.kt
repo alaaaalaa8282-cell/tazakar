@@ -18,7 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mohamedabdelazeim.zekr.data.ZekrPrefs
 import com.mohamedabdelazeim.zekr.ui.screens.AdhkarScreen
 import com.mohamedabdelazeim.zekr.ui.screens.HomeScreen
-import com.mohamedabdelazeim.zekr.theme.ZekrTheme
+import com.mohamedabdelazeim.zekr.ui.theme.ZekrTheme
 import com.mohamedabdelazeim.zekr.worker.ZekrScheduler
 
 class MainActivity : ComponentActivity() {
