@@ -72,6 +72,7 @@ class ZekrService : Service() {
                 stopSelf()
             }
             mediaPlayer?.start()
+         setOnCompletionListener
         } else {
             android.os.Handler(mainLooper).postDelayed({
                 scheduleNext(this)
