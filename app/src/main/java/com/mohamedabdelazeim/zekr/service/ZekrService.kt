@@ -47,7 +47,8 @@ class ZekrService : Service() {
 
         val mode = ZekrPrefs.getPlaybackMode(this)
         
-        val index = if (mode == 1) {            ZekrPrefs.getRepeatIndex(this)
+        val index = if (mode == 1) {
+            ZekrPrefs.getRepeatIndex(this)
         } else {
             ZekrPrefs.nextZekrIndex(this)
         }
@@ -59,8 +60,12 @@ class ZekrService : Service() {
         startForeground(NOTIF_ID, notif)
 
         if (zekr.audioRes != null) {
+            // قراءة مستوى الصوت المحفوظ (0.0 - 1.0)
+            val volume = ZekrPrefs.getVolume(this)
+
             mediaPlayer?.release()
             mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
+            mediaPlayer?.setVolume(volume, volume)
             mediaPlayer?.setOnCompletionListener {
                 it.release()
                 scheduleNext(this)
@@ -96,12 +101,11 @@ class ZekrService : Service() {
         )
     }
 
-    private fun isCallActive(): Boolean {        return try {
+    private fun isCallActive(): Boolean {
+        return try {
             val tm = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             tm.callState != TelephonyManager.CALL_STATE_IDLE
-        } catch (e: Exception) { 
-            false 
-        }
+        } catch (e: Exception) { false }
     }
 
     private fun isInCommunication(): Boolean {
@@ -109,18 +113,14 @@ class ZekrService : Service() {
             val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
             audioManager.mode == AudioManager.MODE_IN_CALL || 
             audioManager.mode == AudioManager.MODE_IN_COMMUNICATION
-        } catch (e: Exception) { 
-            false 
-        }
+        } catch (e: Exception) { false }
     }
 
     private fun isAudioBusy(): Boolean {
         return try {
             val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
             am.isMusicActive
-        } catch (e: Exception) { 
-            false 
-        }
+        } catch (e: Exception) { false }
     }
 
     private fun buildNotification(title: String, text: String): Notification {
@@ -131,9 +131,7 @@ class ZekrService : Service() {
 
         val bmp = try {
             BitmapFactory.decodeResource(resources, R.drawable.notification_father)
-        } catch (e: Exception) {
-            null
-        }
+        } catch (e: Exception) { null }
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -145,7 +143,8 @@ class ZekrService : Service() {
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
 
         if (bmp != null) {
-            builder.setLargeIcon(bmp)                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bmp))
+            builder.setLargeIcon(bmp)
+                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bmp))
         }
 
         return builder.build()
@@ -170,9 +169,7 @@ class ZekrService : Service() {
     }
 
     private fun releaseWakeLock() {
-        wakeLock?.let {
-            if (it.isHeld) it.release()
-        }
+        wakeLock?.let { if (it.isHeld) it.release() }
         wakeLock = null
     }
 
