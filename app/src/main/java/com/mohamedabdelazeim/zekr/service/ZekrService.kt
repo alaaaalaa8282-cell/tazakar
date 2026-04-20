@@ -60,16 +60,22 @@ class ZekrService : Service() {
         startForeground(NOTIF_ID, notif)
 
         if (zekr.audioRes != null) {
-            // قراءة مستوى الصوت المحفوظ (0.0 - 1.0)
-            val volume = ZekrPrefs.getVolume(this)
-
-            mediaPlayer?.release()
-      mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
-      mediaPlayer?.setVolume(volume, volume)
-      mediaPlayer?.setOnCompletionListener {
+    val volume = ZekrPrefs.getVolume(this)
+    
+    mediaPlayer?.release()
+    mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
+    mediaPlayer?.setVolume(volume, volume)
+    mediaPlayer?.setOnCompletionListener {
         it.release()
-       scheduleNext(this)
-       stopSelf()
+        scheduleNext(this)
+        stopSelf()
+    }
+    mediaPlayer?.start()
+} else {
+    android.os.Handler(mainLooper).postDelayed({
+        scheduleNext(this)
+        stopSelf()
+    }, 5000)
 }
 mediaPlayer?.start()
         } else {
