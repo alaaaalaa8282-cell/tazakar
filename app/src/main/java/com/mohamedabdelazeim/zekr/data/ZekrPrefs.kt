@@ -5,16 +5,13 @@ import android.content.Context
 object ZekrPrefs {
     private const val PREFS = "zekr_prefs"
     
-    // مفاتيح الحفظ القديمة
     private const val KEY_INTERVAL = "interval"
     private const val KEY_ENABLED = "enabled"
     private const val KEY_ZEKR_INDEX = "zekr_index"
-    
-    // مفاتيح الحفظ الجديدة (لوضع التكرار)
     private const val KEY_PLAYBACK_MODE = "playback_mode"
     private const val KEY_REPEAT_INDEX = "repeat_selected_index"
+    private const val KEY_VOLUME = "zekr_volume"
 
-    // ========== الدوال القديمة ==========
     fun getIntervalInMinutes(ctx: Context) =
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt(KEY_INTERVAL, 30)
 
@@ -35,24 +32,22 @@ object ZekrPrefs {
         return current
     }
 
-    // ========== الدوال الجديدة ==========
-    fun getPlaybackMode(ctx: Context): Int {
-        return ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_PLAYBACK_MODE, 0)
-    }
+    fun getPlaybackMode(ctx: Context): Int =
+        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt(KEY_PLAYBACK_MODE, 0)
 
-    fun setPlaybackMode(ctx: Context, mode: Int) {
-        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .edit().putInt(KEY_PLAYBACK_MODE, mode).apply()
-    }
+    fun setPlaybackMode(ctx: Context, mode: Int) =
+        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putInt(KEY_PLAYBACK_MODE, mode).apply()
 
-    fun getRepeatIndex(ctx: Context): Int {
-        return ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_REPEAT_INDEX, 0)
-    }
+    fun getRepeatIndex(ctx: Context): Int =
+        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt(KEY_REPEAT_INDEX, 0)
 
-    fun setRepeatIndex(ctx: Context, index: Int) {
-        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .edit().putInt(KEY_REPEAT_INDEX, index).apply()
-    }
+    fun setRepeatIndex(ctx: Context, index: Int) =
+        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putInt(KEY_REPEAT_INDEX, index).apply()
+
+    // مستوى الصوت المستقل (0.0 - 1.0)
+    fun getVolume(ctx: Context): Float =
+        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getFloat(KEY_VOLUME, 1.0f)
+
+    fun setVolume(ctx: Context, v: Float) =
+        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putFloat(KEY_VOLUME, v).apply()
 }
