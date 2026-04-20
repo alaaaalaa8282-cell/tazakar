@@ -64,15 +64,14 @@ class ZekrService : Service() {
             val volume = ZekrPrefs.getVolume(this)
 
             mediaPlayer?.release()
-            mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
-            mediaPlayer?.setVolume(volume, volume)
-            mediaPlayer?.setOnCompletionListener {
-                it.release()
-                scheduleNext(this)
-                stopSelf()
-            }
-            mediaPlayer?.start()
-         setOnCompletionListener
+      mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
+      mediaPlayer?.setVolume(volume, volume)
+      mediaPlayer?.setOnCompletionListener {
+        it.release()
+       scheduleNext(this)
+       stopSelf()
+}
+mediaPlayer?.start()
         } else {
             android.os.Handler(mainLooper).postDelayed({
                 scheduleNext(this)
