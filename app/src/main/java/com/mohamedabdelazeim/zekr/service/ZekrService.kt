@@ -61,7 +61,6 @@ class ZekrService : Service() {
 
         if (zekr.audioRes != null) {
     val volume = ZekrPrefs.getVolume(this)
-    
     mediaPlayer?.release()
     mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
     mediaPlayer?.setVolume(volume, volume)
@@ -77,16 +76,8 @@ class ZekrService : Service() {
         stopSelf()
     }, 5000)
 }
-mediaPlayer?.start()
-        } else {
-            android.os.Handler(mainLooper).postDelayed({
-                scheduleNext(this)
-                stopSelf()
-            }, 5000)
-        }
 
-        return START_NOT_STICKY
-    }
+return START_NOT_STICKY
 
     private fun scheduleNext(context: Context) {
         if (!ZekrPrefs.isEnabled(context)) return
