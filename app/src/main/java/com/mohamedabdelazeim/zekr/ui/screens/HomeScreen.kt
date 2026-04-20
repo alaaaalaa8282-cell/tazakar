@@ -23,6 +23,7 @@ import com.mohamedabdelazeim.zekr.R
 import com.mohamedabdelazeim.zekr.data.ZekrData
 import com.mohamedabdelazeim.zekr.data.ZekrPrefs
 import com.mohamedabdelazeim.zekr.worker.ZekrScheduler
+import androidx.compose.material3.HorizontalDivider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
