@@ -29,29 +29,27 @@ import com.mohamedabdelazeim.zekr.worker.ZekrScheduler
 fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
     val ctx = LocalContext.current
     
-    // قراءة الإعدادات
     var enabled by remember { mutableStateOf(ZekrPrefs.isEnabled(ctx)) }
     var selectedInterval by remember { mutableStateOf(ZekrPrefs.getIntervalInMinutes(ctx)) }
     var expanded by remember { mutableStateOf(false) }
-    
-    // متغيرات جديدة للتحكم في الوضع
-    var playbackMode by remember { mutableStateOf(ZekrPrefs.getPlaybackMode(ctx)) } // 0 = ترتيبي، 1 = تكرار
+    var playbackMode by remember { mutableStateOf(ZekrPrefs.getPlaybackMode(ctx)) }
     var selectedRepeatIndex by remember { mutableStateOf(ZekrPrefs.getRepeatIndex(ctx)) }
     var dhikrMenuExpanded by remember { mutableStateOf(false) }
+    // مستوى الصوت المستقل
+    var zekrVolume by remember { mutableStateOf(ZekrPrefs.getVolume(ctx)) }
 
-    val intervals = listOf(1,5,10,20,15, 30, 60, 120)
+    val intervals = listOf(1, 5, 10, 20, 15, 30, 60, 120)
     val gold = Color(0xFFFFD700)
     val darkGreen = Color(0xFF1B5E20)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background
         Image(
             painter = painterResource(R.drawable.bg_father),
-            contentDescription = null,            modifier = Modifier.fillMaxSize(),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
             contentScale = androidx.compose.ui.layout.ContentScale.Crop
         )
         
-        // Dark overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -71,7 +69,6 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
         ) {
             Spacer(Modifier.height(48.dp))
             
-            // Title
             Text(
                 "محمد عبد العظيم",
                 fontSize = 30.sp,
@@ -94,9 +91,9 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
             
             Spacer(Modifier.height(24.dp))
 
-            // Settings Card
             Card(
-                modifier = Modifier.fillMaxWidth(),                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xCC1B2E1C))
             ) {
                 Column(
@@ -111,7 +108,6 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // Interval selector
                     Text("⏱ الفترة الزمنية بين الأذكار", color = Color.White, fontSize = 14.sp)
                     Spacer(Modifier.height(8.dp))
                     
@@ -145,13 +141,13 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                                         if (enabled) ZekrScheduler.schedule(ctx, min.toLong())
                                         expanded = false
                                     }
-                                )                            }
+                                )
+                            }
                         }
                     }
 
                     Spacer(Modifier.height(16.dp))
 
-                    // ================== الجزء الجديد: اختيار الوضع ==================
                     Text("🎮 طريقة التشغيل", color = Color.White, fontSize = 14.sp, modifier = Modifier.align(Alignment.Start))
                     
                     Row(
@@ -177,7 +173,6 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                         )
                     }
 
-                    // لو اختار تكرار، نعرض قائمة الأذكار
                     if (playbackMode == 1) {
                         Spacer(Modifier.height(8.dp))
                         ExposedDropdownMenuBox(
@@ -194,7 +189,8 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                                 modifier = Modifier.menuAnchor().fillMaxWidth(),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White,                                    focusedBorderColor = gold,
+                                    unfocusedTextColor = Color.White,
+                                    focusedBorderColor = gold,
                                     unfocusedBorderColor = Color.Gray
                                 )
                             )
@@ -215,7 +211,6 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                             }
                         }
                     }
-                    // =================================================================
 
                     Spacer(Modifier.height(16.dp))
 
@@ -243,7 +238,8 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                                 checkedThumbColor = Color.Black,
                                 checkedTrackColor = gold
                             )
-                        )                    }
+                        )
+                    }
                     
                     if (enabled) {
                         Spacer(Modifier.height(8.dp))
@@ -254,12 +250,44 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                             textAlign = TextAlign.Center
                         )
                     }
+
+                    // ===== مستوى الصوت المستقل =====
+                    Spacer(Modifier.height(16.dp))
+                    HorizontalDivider(color = Color(0xFF2E4A2E))
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("🔊 مستوى الصوت", color = Color.White, fontSize = 14.sp)
+                        Text(
+                            "${(zekrVolume * 100).toInt()}%",
+                            color = gold,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
+                    Slider(
+                        value = zekrVolume,
+                        onValueChange = { newVal ->
+                            zekrVolume = newVal
+                            ZekrPrefs.setVolume(ctx, newVal)
+                        },
+                        valueRange = 0f..1f,
+                        colors = SliderDefaults.colors(
+                            thumbColor = gold,
+                            activeTrackColor = gold,
+                            inactiveTrackColor = Color(0xFF2E4A2E)
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    // ================================
                 }
             }
 
             Spacer(Modifier.height(16.dp))
 
-            // Zekr list Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -293,9 +321,9 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                     }
                 }
             }
+
             Spacer(Modifier.height(16.dp))
 
-            // Adhkar Button
             Button(
                 onClick = onNavigateToAdhkar,
                 modifier = Modifier
