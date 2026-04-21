@@ -1,4 +1,4 @@
-herepackage com.mohamedabdelazeim.zekr.service
+package com.mohamedabdelazeim.zekr.service
 
 import android.app.AlarmManager
 import android.app.Notification
@@ -38,7 +38,7 @@ class ZekrService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        
+لا حول ولا قوة الا بالله العلي العظيم البقاء لله وحده أن لله وانا اليه ربنا يصبرك ويربط علي قلبك ويعوض عليك ويجعله شفيعا لك يوم القيامه
         if (isCallActive() || isAudioBusy() || isInCommunication()) {
             scheduleNext(this)
             stopSelf()
@@ -46,7 +46,7 @@ class ZekrService : Service() {
         }
 
         val mode = ZekrPrefs.getPlaybackMode(this)
-        
+
         val index = if (mode == 1) {
             ZekrPrefs.getRepeatIndex(this)
         } else {
@@ -59,33 +59,33 @@ class ZekrService : Service() {
         val notif = buildNotification(zekr.name, zekr.text)
         startForeground(NOTIF_ID, notif)
 
-     if (zekr.audioRes != null) {
-    val volume = ZekrPrefs.getVolume(this)
-    
-    mediaPlayer?.release()
-    mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
-    mediaPlayer?.setVolume(volume, volume)
-    mediaPlayer?.setOnCompletionListener {
-        it.release()
-        scheduleNext(this)
-        stopSelf()
-    }
-    mediaPlayer?.start()
-} else {
-    android.os.Handler(mainLooper).postDelayed({
-        scheduleNext(this)
-        stopSelf()
-    }, 5000)
-}
+        if (zekr.audioRes != null) {
+            val volume = ZekrPrefs.getVolume(this)
+            mediaPlayer?.release()
+            mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
+            mediaPlayer?.setVolume(volume, volume)
+            mediaPlayer?.setOnCompletionListener {
+                it.release()
+                scheduleNext(this)
+                stopSelf()
+            }
+            mediaPlayer?.start()
+        } else {
+            android.os.Handler(mainLooper).postDelayed({
+                scheduleNext(this)
+                stopSelf()
+            }, 5000)
+        }
 
-return START_NOT_STICKY
+        return START_NOT_STICKY
+    }
 
     private fun scheduleNext(context: Context) {
         if (!ZekrPrefs.isEnabled(context)) return
-        
+
         val interval = ZekrPrefs.getIntervalInMinutes(context).toLong()
         val intent = Intent(context, ZekrService::class.java)
-        
+
         val pending = PendingIntent.getService(
             context, 0, intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -103,22 +103,28 @@ return START_NOT_STICKY
         return try {
             val tm = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             tm.callState != TelephonyManager.CALL_STATE_IDLE
-        } catch (e: Exception) { false }
+        } catch (e: Exception) {
+            false
+        }
     }
 
     private fun isInCommunication(): Boolean {
         return try {
             val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            audioManager.mode == AudioManager.MODE_IN_CALL || 
+            audioManager.mode == AudioManager.MODE_IN_CALL ||
             audioManager.mode == AudioManager.MODE_IN_COMMUNICATION
-        } catch (e: Exception) { false }
+        } catch (e: Exception) {
+            false
+        }
     }
 
     private fun isAudioBusy(): Boolean {
         return try {
             val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
             am.isMusicActive
-        } catch (e: Exception) { false }
+        } catch (e: Exception) {
+            false
+        }
     }
 
     private fun buildNotification(title: String, text: String): Notification {
@@ -129,7 +135,9 @@ return START_NOT_STICKY
 
         val bmp = try {
             BitmapFactory.decodeResource(resources, R.drawable.notification_father)
-        } catch (e: Exception) { null }
+        } catch (e: Exception) {
+            null
+        }
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -142,7 +150,7 @@ return START_NOT_STICKY
 
         if (bmp != null) {
             builder.setLargeIcon(bmp)
-                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bmp))
+            builder.setStyle(NotificationCompat.BigPictureStyle().bigPicture(bmp))
         }
 
         return builder.build()
@@ -163,11 +171,13 @@ return START_NOT_STICKY
             PowerManager.PARTIAL_WAKE_LOCK,
             "ZekrApp::WakeLockTag"
         )
-        wakeLock?.acquire(10*60*1000L)
+        wakeLock?.acquire(10 * 60 * 1000L)
     }
 
     private fun releaseWakeLock() {
-        wakeLock?.let { if (it.isHeld) it.release() }
+        wakeLock?.let {
+            if (it.isHeld) it.release()
+        }
         wakeLock = null
     }
 
@@ -178,4 +188,4 @@ return START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
-    }
+}
