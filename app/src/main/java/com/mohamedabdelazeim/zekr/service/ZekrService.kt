@@ -61,7 +61,7 @@ class ZekrService : Service() {
 
         if (zekr.audioRes != null) {
             val volume = ZekrPrefs.getVolume(this)
-            val logVolume = if (volume == 0f) 0f else (1 - (ln(100.0 - (volume * 99).toDouble()) / ln(100.0))).toFloat()
+            val logVolume = volume * volume
             mediaPlayer?.release()
             mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
             mediaPlayer?.setVolume(logVolume, logVolume)
