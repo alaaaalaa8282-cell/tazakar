@@ -60,7 +60,7 @@ class ZekrService : Service() {
         startForeground(NOTIF_ID, notif)
 
         if (zekr.audioRes != null) {
-            val logVolume = if (volume == 0f) 0f else (1 - (Math.log(100 - (volume * 99).toDouble()) / Math.log(100))).toFloat()
+            val logVolume = if (volume == 0f) 0f else (1 - (kotlin.math.ln(100.0 - (volume * 99).toDouble()) / kotlin.math.ln(100.0))).toFloat()
 mediaPlayer?.setVolume(logVolume, logVolume)
 mediaPlayer = MediaPlayer()
 mediaPlayer?.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC)
