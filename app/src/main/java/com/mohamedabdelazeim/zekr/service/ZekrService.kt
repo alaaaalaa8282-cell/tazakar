@@ -19,7 +19,7 @@ import com.mohamedabdelazeim.zekr.MainActivity
 import com.mohamedabdelazeim.zekr.R
 import com.mohamedabdelazeim.zekr.data.ZekrData
 import com.mohamedabdelazeim.zekr.data.ZekrPrefs
-import kotlin.math.ln
+import kotlin.math.pow
 
 class ZekrService : Service() {
 
@@ -61,7 +61,7 @@ class ZekrService : Service() {
 
         if (zekr.audioRes != null) {
             val volume = ZekrPrefs.getVolume(this)
-            val logVolume = volume * volume
+            val logVolume = if (volume == 0f) 0f else volume.toDouble().pow(3).toFloat()
             mediaPlayer?.release()
             mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
             mediaPlayer?.setVolume(logVolume, logVolume)
