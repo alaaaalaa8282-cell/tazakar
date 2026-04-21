@@ -256,15 +256,7 @@ Slider(
     onValueChange = { newVol ->
         zekrVolume = newVol
         ZekrPrefs.setVolume(ctx, newVol)
-        // تطبيق الصوت فوراً
-        val audioManager = ctx.getSystemService(android.content.Context.AUDIO_SERVICE) 
-            as android.media.AudioManager
-        val maxVol = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC)
-        audioManager.setStreamVolume(
-            android.media.AudioManager.STREAM_MUSIC,
-            (newVol * maxVol).toInt(),
-            0
-        )
+        
     },
     valueRange = 0f..1f,
     colors = SliderDefaults.colors(
