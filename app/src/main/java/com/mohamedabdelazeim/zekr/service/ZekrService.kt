@@ -61,9 +61,12 @@ class ZekrService : Service() {
 
         if (zekr.audioRes != null) {
             val volume = ZekrPrefs.getVolume(this)
-            mediaPlayer?.release()
-            mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
-            mediaPlayer?.setVolume(volume, volume)
+mediaPlayer?.release()
+mediaPlayer = MediaPlayer()
+mediaPlayer?.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC)
+mediaPlayer?.setDataSource(resources.openRawResourceFd(zekr.audioRes))
+mediaPlayer?.prepare()
+mediaPlayer?.setVolume(volume, volume)
             mediaPlayer?.setOnCompletionListener {
                 it.release()
                 scheduleNext(this)
