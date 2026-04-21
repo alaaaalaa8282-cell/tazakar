@@ -275,7 +275,7 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                             zekrVolume = newVal
                             ZekrPrefs.setVolume(ctx, newVal)
                         },
-                        valueRange = 1f..0f,
+                        valueRange = 0f..1f,
                         colors = SliderDefaults.colors(
                             thumbColor = gold,
                             activeTrackColor = gold,
