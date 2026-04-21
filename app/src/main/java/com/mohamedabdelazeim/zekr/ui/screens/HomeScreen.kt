@@ -9,10 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,17 +27,16 @@ import androidx.compose.material3.HorizontalDivider
 @Composable
 fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
     val ctx = LocalContext.current
-    
+
     var enabled by remember { mutableStateOf(ZekrPrefs.isEnabled(ctx)) }
     var selectedInterval by remember { mutableStateOf(ZekrPrefs.getIntervalInMinutes(ctx)) }
     var expanded by remember { mutableStateOf(false) }
     var playbackMode by remember { mutableStateOf(ZekrPrefs.getPlaybackMode(ctx)) }
     var selectedRepeatIndex by remember { mutableStateOf(ZekrPrefs.getRepeatIndex(ctx)) }
     var dhikrMenuExpanded by remember { mutableStateOf(false) }
-    // مستوى الصوت المستقل
     var zekrVolume by remember { mutableStateOf(ZekrPrefs.getVolume(ctx)) }
 
-    val intervals = listOf(1, 5, 10, 20, 15, 30, 60, 120)
+    val intervals = listOf(1, 5, 10, 15, 20, 30, 60, 120)
     val gold = Color(0xFFFFD700)
     val darkGreen = Color(0xFF1B5E20)
 
@@ -50,15 +47,10 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
             modifier = Modifier.fillMaxSize(),
             contentScale = androidx.compose.ui.layout.ContentScale.Crop
         )
-        
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xCC000000), Color(0xEE000000))
-                    )
-                )
+                .background(Brush.verticalGradient(listOf(Color(0xCC000000), Color(0xEE000000))))
         )
 
         Column(
@@ -69,27 +61,11 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(48.dp))
-            
-            Text(
-                "محمد عبد العظيم",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                color = gold,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                "ذكر",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                "🤲",
-                fontSize = 36.sp,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            
+
+            Text("محمد عبد العظيم", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = gold, textAlign = TextAlign.Center)
+            Text("ذكر", fontSize = 22.sp, fontWeight = FontWeight.Medium, color = Color.White, textAlign = TextAlign.Center)
+            Text("🤲", fontSize = 36.sp, modifier = Modifier.padding(vertical = 8.dp))
+
             Spacer(Modifier.height(24.dp))
 
             Card(
@@ -101,21 +77,12 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                     modifier = Modifier.padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        "⚙️ إعدادات الذكر",
-                        color = gold,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    Text("⚙️ إعدادات الذكر", color = gold, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(bottom = 16.dp))
 
                     Text("⏱ الفترة الزمنية بين الأذكار", color = Color.White, fontSize = 14.sp)
                     Spacer(Modifier.height(8.dp))
-                    
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it }
-                    ) {
+
+                    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
                         OutlinedTextField(
                             value = "كل $selectedInterval دقيقة",
                             onValueChange = {},
@@ -129,10 +96,7 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                                 unfocusedBorderColor = Color.Gray
                             )
                         )
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
+                        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                             intervals.forEach { min ->
                                 DropdownMenuItem(
                                     text = { Text("$min دقيقة") },
@@ -150,7 +114,6 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                     Spacer(Modifier.height(16.dp))
 
                     Text("🎮 طريقة التشغيل", color = Color.White, fontSize = 14.sp, modifier = Modifier.align(Alignment.Start))
-                    
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -163,27 +126,19 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                         )
                         Switch(
                             checked = playbackMode == 1,
-                            onCheckedChange = { 
+                            onCheckedChange = {
                                 playbackMode = if (it) 1 else 0
                                 ZekrPrefs.setPlaybackMode(ctx, playbackMode)
                             },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = gold,
-                                checkedTrackColor = darkGreen
-                            )
+                            colors = SwitchDefaults.colors(checkedThumbColor = gold, checkedTrackColor = darkGreen)
                         )
                     }
 
                     if (playbackMode == 1) {
                         Spacer(Modifier.height(8.dp))
-                        ExposedDropdownMenuBox(
-                            expanded = dhikrMenuExpanded,
-                            onExpandedChange = { dhikrMenuExpanded = it }
-                        ) {
+                        ExposedDropdownMenuBox(expanded = dhikrMenuExpanded, onExpandedChange = { dhikrMenuExpanded = it }) {
                             OutlinedTextField(
-                                value = if (selectedRepeatIndex < ZekrData.zekrList.size) 
-                                            ZekrData.zekrList[selectedRepeatIndex].name 
-                                        else "اختر ذكر...",
+                                value = if (selectedRepeatIndex < ZekrData.zekrList.size) ZekrData.zekrList[selectedRepeatIndex].name else "اختر ذكر...",
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(dhikrMenuExpanded) },
@@ -195,10 +150,7 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                                     unfocusedBorderColor = Color.Gray
                                 )
                             )
-                            ExposedDropdownMenu(
-                                expanded = dhikrMenuExpanded,
-                                onDismissRequest = { dhikrMenuExpanded = false }
-                            ) {
+                            ExposedDropdownMenu(expanded = dhikrMenuExpanded, onDismissRequest = { dhikrMenuExpanded = false }) {
                                 ZekrData.zekrList.forEachIndexed { index, zekr ->
                                     DropdownMenuItem(
                                         text = { Text(zekr.name, color = if (index == selectedRepeatIndex) gold else Color.Black) },
@@ -215,7 +167,6 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
 
                     Spacer(Modifier.height(16.dp))
 
-                    // Enable Switch
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -235,67 +186,35 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                                 if (v) ZekrScheduler.schedule(ctx, selectedInterval.toLong())
                                 else ZekrScheduler.cancel(ctx)
                             },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.Black,
-                                checkedTrackColor = gold
-                            )
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = gold)
                         )
                     }
-                    
+
                     if (enabled) {
                         Spacer(Modifier.height(8.dp))
-                        Text(
-                            "⏰ سيتذكرك بالأذكار كل $selectedInterval دقيقة",
-                          Spacer(Modifier.height(16.dp))
-
-Text("🔊 مستوى الصوت", color = Color.White, fontSize = 14.sp,
-    modifier = Modifier.align(Alignment.Start))
-
-Slider(
-    value = zekrVolume,
-    onValueChange = { newVol ->
-        zekrVolume = newVol
-        ZekrPrefs.setVolume(ctx, newVol)
-        
-    },
-    valueRange = 0f..1f,
-    colors = SliderDefaults.colors(
-        thumbColor = gold,
-        activeTrackColor = gold,
-        inactiveTrackColor = Color.Gray
-    ),
-    modifier = Modifier.fillMaxWidth()
-)
-                            color = Color(0xFFAAAAAA),
-                            fontSize = 13.sp,
-                            textAlign = TextAlign.Center
-                        )
+                        Text("⏰ سيتذكرك بالأذكار كل $selectedInterval دقيقة", color = Color(0xFFAAAAAA), fontSize = 13.sp, textAlign = TextAlign.Center)
                     }
 
-                    // ===== مستوى الصوت المستقل =====
                     Spacer(Modifier.height(16.dp))
                     HorizontalDivider(color = Color(0xFF2E4A2E))
                     Spacer(Modifier.height(12.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("🔊 مستوى الصوت", color = Color.White, fontSize = 14.sp)
-                        Text(
-                            "${(zekrVolume * 100).toInt()}%",
-                            color = gold,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
+                        Text("${(zekrVolume * 100).toInt()}%", color = gold, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     }
+
                     Slider(
                         value = zekrVolume,
                         onValueChange = { newVal ->
                             zekrVolume = newVal
                             ZekrPrefs.setVolume(ctx, newVal)
                         },
-                        valueRange = 1f..0f,
+                        valueRange = 0f..1f,
                         colors = SliderDefaults.colors(
                             thumbColor = gold,
                             activeTrackColor = gold,
@@ -303,7 +222,6 @@ Slider(
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
-                    // ================================
                 }
             }
 
@@ -315,14 +233,7 @@ Slider(
                 colors = CardDefaults.cardColors(containerColor = Color(0xCC0D1B0F))
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        "📿 الأذكار المبرمجة",
-                        color = gold,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-
+                    Text("📿 الأذكار المبرمجة", color = gold, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(bottom = 12.dp))
                     val zekrNames = listOf(
                         "🤲 الصلاة على النبي ﷺ",
                         "📖 آية الأحزاب",
@@ -333,12 +244,7 @@ Slider(
                         "💎 ربِّ اغفر لي وتُبْ عليّ"
                     )
                     zekrNames.forEach { zekr ->
-                        Text(
-                            zekr,
-                            color = Color.White,
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(vertical = 3.dp)
-                        )
+                        Text(zekr, color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(vertical = 3.dp))
                     }
                 }
             }
@@ -347,20 +253,13 @@ Slider(
 
             Button(
                 onClick = onNavigateToAdhkar,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = darkGreen)
             ) {
                 Icon(Icons.Default.MenuBook, contentDescription = null, tint = gold)
                 Spacer(Modifier.width(8.dp))
-                Text(
-                    "أذكار الصباح والمساء",
-                    color = gold,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
+                Text("أذكار الصباح والمساء", color = gold, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
 
             Spacer(Modifier.height(32.dp))
