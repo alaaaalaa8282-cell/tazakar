@@ -11,6 +11,7 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.telephony.TelephonyManager
@@ -19,12 +20,12 @@ import com.mohamedabdelazeim.zekr.MainActivity
 import com.mohamedabdelazeim.zekr.R
 import com.mohamedabdelazeim.zekr.data.ZekrData
 import com.mohamedabdelazeim.zekr.data.ZekrPrefs
-import kotlin.math.pow
 
 class ZekrService : Service() {
 
     private var mediaPlayer: MediaPlayer? = null
     private var wakeLock: PowerManager.WakeLock? = null
+    private var audioFocusGranted = false
 
     companion object {
         const val CHANNEL_ID = "zekr_channel"
@@ -45,6 +46,13 @@ class ZekrService : Service() {
             return START_NOT_STICKY
         }
 
+        // ← التعديل: لو حاجة تانية شاغلة الصوت (زي الأذان) اوقف
+        if (!requestAudioFocus()) {
+            scheduleNext(this)
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         val mode = ZekrPrefs.getPlaybackMode(this)
 
         val index = if (mode == 1) {
@@ -60,25 +68,51 @@ class ZekrService : Service() {
         startForeground(NOTIF_ID, notif)
 
         if (zekr.audioRes != null) {
-            val volume = ZekrPrefs.getVolume(this)
-            val logVolume = if (volume == 0f) 0f else volume.toDouble().pow(3).toFloat()
             mediaPlayer?.release()
             mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
-            mediaPlayer?.setVolume(logVolume, logVolume)
             mediaPlayer?.setOnCompletionListener {
                 it.release()
+                abandonAudioFocus()
                 scheduleNext(this)
                 stopSelf()
             }
             mediaPlayer?.start()
         } else {
             android.os.Handler(mainLooper).postDelayed({
+                abandonAudioFocus()
                 scheduleNext(this)
                 stopSelf()
             }, 5000)
         }
 
         return START_NOT_STICKY
+    }
+
+    // ← التعديل: طلب أولوية الصوت
+    private fun requestAudioFocus(): Boolean {
+        val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val result = am.requestAudioFocus(
+            { focus ->
+                if (focus == AudioManager.AUDIOFOCUS_LOSS) {
+                    mediaPlayer?.pause()
+                    abandonAudioFocus()
+                    stopSelf()
+                }
+            },
+            AudioManager.STREAM_MUSIC,
+            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
+        )
+        audioFocusGranted = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        return audioFocusGranted
+    }
+
+    // ← التعديل: تحرير أولوية الصوت بعد الانتهاء
+    private fun abandonAudioFocus() {
+        if (audioFocusGranted) {
+            val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            am.abandonAudioFocus(null)
+            audioFocusGranted = false
+        }
     }
 
     private fun scheduleNext(context: Context) {
@@ -151,7 +185,7 @@ class ZekrService : Service() {
 
         if (bmp != null) {
             builder.setLargeIcon(bmp)
-            builder.setStyle(NotificationCompat.BigPictureStyle().bigPicture(bmp))
+                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bmp))
         }
 
         return builder.build()
@@ -184,6 +218,7 @@ class ZekrService : Service() {
 
     override fun onDestroy() {
         mediaPlayer?.release()
+        abandonAudioFocus()
         releaseWakeLock()
         super.onDestroy()
     }
