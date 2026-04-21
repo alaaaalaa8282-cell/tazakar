@@ -59,8 +59,9 @@ class ZekrService : Service() {
         val notif = buildNotification(zekr.name, zekr.text)
         startForeground(NOTIF_ID, notif)
 
-        if (zekr.audioRes != null) {
+     if (zekr.audioRes != null) {
     val volume = ZekrPrefs.getVolume(this)
+    
     mediaPlayer?.release()
     mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
     mediaPlayer?.setVolume(volume, volume)
