@@ -246,6 +246,34 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                         Spacer(Modifier.height(8.dp))
                         Text(
                             "⏰ سيتذكرك بالأذكار كل $selectedInterval دقيقة",
+                          Spacer(Modifier.height(16.dp))
+
+Text("🔊 مستوى الصوت", color = Color.White, fontSize = 14.sp,
+    modifier = Modifier.align(Alignment.Start))
+
+Slider(
+    value = zekrVolume,
+    onValueChange = { newVol ->
+        zekrVolume = newVol
+        ZekrPrefs.setVolume(ctx, newVol)
+        // تطبيق الصوت فوراً
+        val audioManager = ctx.getSystemService(android.content.Context.AUDIO_SERVICE) 
+            as android.media.AudioManager
+        val maxVol = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC)
+        audioManager.setStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            (newVol * maxVol).toInt(),
+            0
+        )
+    },
+    valueRange = 0f..1f,
+    colors = SliderDefaults.colors(
+        thumbColor = gold,
+        activeTrackColor = gold,
+        inactiveTrackColor = Color.Gray
+    ),
+    modifier = Modifier.fillMaxWidth()
+)
                             color = Color(0xFFAAAAAA),
                             fontSize = 13.sp,
                             textAlign = TextAlign.Center
@@ -275,7 +303,7 @@ fun HomeScreen(onNavigateToAdhkar: () -> Unit) {
                             zekrVolume = newVal
                             ZekrPrefs.setVolume(ctx, newVal)
                         },
-                        valueRange = 0f..1f,
+                        valueRange = 1f..0f,
                         colors = SliderDefaults.colors(
                             thumbColor = gold,
                             activeTrackColor = gold,
