@@ -38,7 +38,7 @@ class ZekrService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-لا حول ولا قوة الا بالله العلي العظيم البقاء لله وحده أن لله وانا اليه ربنا يصبرك ويربط علي قلبك ويعوض عليك ويجعله شفيعا لك يوم القيامه
+
         if (isCallActive() || isAudioBusy() || isInCommunication()) {
             scheduleNext(this)
             stopSelf()
