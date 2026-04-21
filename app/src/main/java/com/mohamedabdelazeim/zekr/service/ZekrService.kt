@@ -11,7 +11,6 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.telephony.TelephonyManager
@@ -20,6 +19,7 @@ import com.mohamedabdelazeim.zekr.MainActivity
 import com.mohamedabdelazeim.zekr.R
 import com.mohamedabdelazeim.zekr.data.ZekrData
 import com.mohamedabdelazeim.zekr.data.ZekrPrefs
+import kotlin.math.ln
 
 class ZekrService : Service() {
 
@@ -60,13 +60,11 @@ class ZekrService : Service() {
         startForeground(NOTIF_ID, notif)
 
         if (zekr.audioRes != null) {
-            val logVolume = if (volume == 0f) 0f else (1 - (kotlin.math.ln(100.0 - (volume * 99).toDouble()) / kotlin.math.ln(100.0))).toFloat()
-mediaPlayer?.setVolume(logVolume, logVolume)
-mediaPlayer = MediaPlayer()
-mediaPlayer?.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC)
-mediaPlayer?.setDataSource(resources.openRawResourceFd(zekr.audioRes))
-mediaPlayer?.prepare()
-mediaPlayer?.setVolume(volume, volume)
+            val volume = ZekrPrefs.getVolume(this)
+            val logVolume = if (volume == 0f) 0f else (1 - (ln(100.0 - (volume * 99).toDouble()) / ln(100.0))).toFloat()
+            mediaPlayer?.release()
+            mediaPlayer = MediaPlayer.create(this, zekr.audioRes)
+            mediaPlayer?.setVolume(logVolume, logVolume)
             mediaPlayer?.setOnCompletionListener {
                 it.release()
                 scheduleNext(this)
